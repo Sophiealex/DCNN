@@ -63,3 +63,12 @@ class DCNN():
         fold_flatten = tf.reshape(fold, tf.cast([-1, top_k*self.embed_size*num_filters[2]/8], tf.int32))
         out = self.full_connect_layer(fold_flatten, Wh, bh, Wo, dropout_keep_prob)
         return out
+
+    def get_hidden_feature(self, sent, W1, W2, b1, b2, k1, top_k, Wh, bh):
+        conv1 = self.one_dim_conv_layer(sent, W1, b1)
+        conv1 = self.fold_k_max_pooling(conv1, k1)
+        conv2 = self.one_dim_conv_layer(conv1, W2, b2)
+        fold = self.fold_k_max_pooling(conv2, top_k)
+        fold_flatten = tf.reshape(fold, tf.cast([-1, top_k * self.embed_size * self.num_filters[1] / 4], tf.int32))
+        hidden_feature = tf.matmul(fold_flatten, Wh) + bh
+        return hidden_feature
